@@ -32,6 +32,7 @@
       height: 100vh;
       object-fit: cover;
       z-index: 1;
+      pointer-events: none; /* ★ここ重要 */
     }
     #sign {
       position: fixed;
@@ -62,3 +63,18 @@
   btn.onclick = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" },
+        audio: false
+      });
+      video.srcObject = stream;
+      video.style.pointerEvents = "auto"; // ★ここ追加
+      btn.style.display = "none";
+      sign.style.display = "block";
+    } catch (e) {
+      alert("カメラを起動できません。ブラウザ設定を確認してください。");
+    }
+  };
+</script>
+
+</body>
+</html>
