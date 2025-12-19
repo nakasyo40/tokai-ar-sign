@@ -61,7 +61,7 @@ canvas { display: none; }
 <canvas id="canvas"></canvas>
 
 <script>
-window.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
   const startBtn = document.getElementById("startBtn");
   const shutterBtn = document.getElementById("shutterBtn");
   const video = document.getElementById("video");
@@ -70,4 +70,19 @@ window.addEventListener("DOMContentLoaded", () => {
   // カメラ起動
   startBtn.addEventListener("click", async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      video.srcObject = stream;
+
+      startBtn.style.display = "none";
+      shutterBtn.style.display = "block";
+    } catch (err) {
+      alert("カメラにアクセスできませんでした: " + err);
+    }
+  });
+
+  // 撮影処理
+  shutterBtn.addEventListener("click", () => {
+    const w = video.videoWidth;
+    const h = video.videoHeight;
+    canvas.width = w;
+    canvas.heigh
