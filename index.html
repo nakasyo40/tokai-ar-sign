@@ -1,41 +1,73 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>Tokai University AR Sign</title>
-
+  <meta charset="UTF-8" />
+  <title>TOKAI AR Sign</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
       margin: 0;
-      overflow: hidden;
+      background: black;
+      text-align: center;
+      color: white;
+      font-family: sans-serif;
     }
-
-    /* カメラ映像 */
-    video {
+    #startBtn {
       position: fixed;
-      top: 0;
-      left: 0;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 16px 24px;
+      font-size: 18px;
+      border-radius: 8px;
+      border: none;
+      background: #0066cc;
+      color: white;
+    }
+    video, img {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    video {
       width: 100vw;
       height: 100vh;
       object-fit: cover;
       z-index: 1;
     }
-
-    /* 看板画像（中央寄せ・写真映え） */
     img {
-      position: fixed;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      height: 70vh;        /* サイズ調整可：60〜80vh */
-      opacity: 0.9;        /* 少し透過して品よく */
+      width: 80vw;
+      max-width: 600px;
       z-index: 2;
-      pointer-events: none; /* 操作の邪魔をしない */
+      pointer-events: none;
     }
   </style>
 </head>
-
 <body>
 
-  <!-- カメラ映像 -->
-  <video id="camera" autoplay playsinline></video
+<button id="startBtn">カメラを起動</button>
+
+<video id="video" autoplay playsinline></video>
+<img src="sign.png" alt="AR看板">
+
+<script>
+  const btn = document.getElementById("startBtn");
+  const video = document.getElementById("video");
+
+  btn.addEventListener("click", async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" },
+        audio: false
+      });
+      video.srcObject = stream;
+      btn.style.display = "none";
+    } catch (e) {
+      alert("カメラを起動できませんでした");
+    }
+  });
+</script>
+
+</body>
+</html>
