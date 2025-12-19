@@ -86,25 +86,38 @@ canvas { display: none; }
 <canvas id="canvas"></canvas>
 
 <script>
-const video = document.getElementById("video");
-const sign = document.getElementById("sign");
-const startBtn = document.getElementById("startBtn");
-const shutterBtn = document.getElementById("shutterBtn");
+const canvas = document.getElementById("canvas");
 
-startBtn.addEventListener("click", () => {
-  navigator.mediaDevices.getUserMedia({
-    video: true,
-    audio: false
-  }).then(stream => {
-    video.srcObject = stream;
-    startBtn.style.display = "none";
-    sign.style.display = "block";
-    shutterBtn.style.display = "block";
-  }).catch(err => {
-    alert("カメラを起動できません");
-  });
+shutterBtn.addEventListener("click", () => {
+  const w = video.videoWidth;
+  const h = video.videoHeight;
+
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+
+  // カメラ映像
+  ctx.drawImage(video, 0, 0, w, h);
+
+  // 看板を合成
+  const r = sign.getBoundingClientRect();
+  ctx.drawImage(
+    sign,
+    r.left * w / window.innerWidth,
+    r.top * h / window.innerHeight,
+    r.width * w / window.innerWidth,
+    r.height * h / window.innerHeight
+  );
+
+  // 保存
+  const a = document.createElement("a");
+  a.href = canvas.toDataURL("image/png");
+  a.download = "tokai-ar-photo.png";
+  a.click();
 });
 </script>
 
+
 </body>
 </html>
+
