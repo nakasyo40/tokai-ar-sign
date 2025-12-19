@@ -73,54 +73,37 @@ canvas { display: none; }
 <canvas id="canvas"></canvas>
 
 <script>
-const startBtn = document.getElementById("startBtn");
-const shutterBtn = document.getElementById("shutterBtn");
-const video = document.getElementById("video");
-const sign = document.getElementById("sign");
-const canvas = document.getElementById("canvas");
+window.addEventListener("DOMContentLoaded", () => {
+  const startBtn = document.getElementById("startBtn");
+  const shutterBtn = document.getElementById("shutterBtn");
+  const video = document.getElementById("video");
+  const sign = document.getElementById("sign");
+  const canvas = document.getElementById("canvas");
 
-// カメラ起動
-startBtn.addEventListener("click", async () => {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    video.srcObject = stream;
+  // カメラ起動
+  startBtn.addEventListener("click", async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      video.srcObject = stream;
 
-    // ボタン・看板の表示切り替え
-    startBtn.style.display = "none";
-    shutterBtn.style.display = "block";
-    sign.style.display = "block";
-  } catch (err) {
-    alert("カメラにアクセスできませんでした: " + err);
-  }
-});
+      startBtn.style.display = "none";
+      shutterBtn.style.display = "block";
+      sign.style.display = "block";
+    } catch (err) {
+      alert("カメラにアクセスできませんでした: " + err);
+    }
+  });
 
-// 撮影処理
-shutterBtn.addEventListener("click", () => {
-  const w = video.videoWidth;
-  const h = video.videoHeight;
-  canvas.width = w;
-  canvas.height = h;
-  const ctx = canvas.getContext("2d");
+  // 撮影処理
+  shutterBtn.addEventListener("click", () => {
+    const w = video.videoWidth;
+    const h = video.videoHeight;
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
 
-  // カメラ映像
-  ctx.drawImage(video, 0, 0, w, h);
+    // カメラ映像
+    ctx.drawImage(video, 0, 0, w, h);
 
-  // 看板を合成
-  const r = sign.getBoundingClientRect();
-  ctx.drawImage(
-    sign,
-    r.left * w / window.innerWidth,
-    r.top * h / window.innerHeight,
-    r.width * w / window.innerWidth,
-    r.height * h / window.innerHeight
-  );
-
-  // 保存
-  const a = document.createElement("a");
-  a.href = canvas.toDataURL("image/png");
-  a.download = "tokai-ar-photo.png";
-  a.click();
-});
-</script>
-</body>
-</html>
+    // 看板を合成
+    const r = sign.getBoundingC
