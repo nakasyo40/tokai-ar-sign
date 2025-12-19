@@ -85,4 +85,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const w = video.videoWidth;
     const h = video.videoHeight;
     canvas.width = w;
-    canvas.heigh
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+
+    ctx.drawImage(video, 0, 0, w, h);
+
+    const a = document.createElement("a");
+    a.href = canvas.toData
