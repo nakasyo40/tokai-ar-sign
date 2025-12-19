@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TOKAI AR - ピンチ対応</title>
+<title>TOKAI AR - カメラ切替対応</title>
 <style>
 body {
   margin: 0;
@@ -27,10 +27,10 @@ video {
   position: fixed;
   bottom: 20px;
   left: 20px;
-  width: 150px; /* 初期幅 */
+  width: 150px;
   z-index: 10;
   pointer-events: auto;
-  touch-action: none; /* ピンチ操作対応 */
+  touch-action: none;
 }
 
 button {
@@ -43,11 +43,11 @@ button {
   background: #0066cc;
   color: white;
   cursor: pointer;
-  z-index: 9999; /* ボタンは最前面 */
+  z-index: 9999;
 }
 
 #startBtn {
-  top: 45%;
+  top: 40%;
   left: 50%;
   margin-left: -90px;
 }
@@ -59,13 +59,21 @@ button {
   display: none;
 }
 
+#switchBtn {
+  bottom: 70px;
+  left: 50%;
+  margin-left: -90px;
+  display: none;
+}
+
 canvas { display: none; }
 </style>
 </head>
 <body>
 
-<button id="startBtn">カメラを起動</button>
+<button id="startBtn">カメラ起動</button>
 <button id="shutterBtn">撮影する</button>
+<button id="switchBtn">カメラ切替</button>
 
 <video id="video" autoplay playsinline></video>
 <img id="sign" src="sign.png">
@@ -75,23 +83,40 @@ canvas { display: none; }
 document.addEventListener("DOMContentLoaded", () => {
   const startBtn = document.getElementById("startBtn");
   const shutterBtn = document.getElementById("shutterBtn");
+  const switchBtn = document.getElementById("switchBtn");
   const video = document.getElementById("video");
   const sign = document.getElementById("sign");
   const canvas = document.getElementById("canvas");
 
-  // カメラ起動
-  startBtn.addEventListener("click", async () => {
+  let currentFacing = "environment"; // デフォルト：アウトカメラ
+  let stream;
+
+  async function startCamera(facingMode) {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+    }
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: facingMode } }
+      });
       video.srcObject = stream;
-      startBtn.style.display = "none";
-      shutterBtn.style.display = "block";
     } catch (err) {
       alert("カメラにアクセスできませんでした: " + err);
     }
+  }
+
+  startBtn.addEventListener("click", async () => {
+    await startCamera(currentFacing);
+    startBtn.style.display = "none";
+    shutterBtn.style.display = "block";
+    switchBtn.style.display = "block";
   });
 
-  // 撮影処理
+  switchBtn.addEventListener("click", async () => {
+    currentFacing = currentFacing === "environment" ? "user" : "environment";
+    await startCamera(currentFacing);
+  });
+
   shutterBtn.addEventListener("click", () => {
     const w = video.videoWidth;
     const h = video.videoHeight;
@@ -101,7 +126,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     ctx.drawImage(video, 0, 0, w, h);
 
-    // 看板の現在位置・サイズで描画
     const rect = sign.getBoundingClientRect();
     ctx.drawImage(
       sign,
@@ -111,7 +135,6 @@ document.addEventListener("DOMContentLoaded", () => {
       rect.height * h / window.innerHeight
     );
 
-    // 保存
     const a = document.createElement("a");
     a.href = canvas.toDataURL("image/png");
     a.download = "tokai-ar-photo.png";
@@ -138,7 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const newDistance = Math.hypot(dx, dy);
       const scale = newDistance / initialDistance;
       sign.style.width = initialWidth * scale + 'px';
-      e.preventDefault(); // 画面スクロール防止
+      e.preventDefault();
     }
   });
 });
