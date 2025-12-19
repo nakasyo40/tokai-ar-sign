@@ -22,7 +22,7 @@
       border: none;
       background: #0066cc;
       color: white;
-      z-index: 20;
+      z-index: 30;
       pointer-events: auto;
     }
 
@@ -56,7 +56,7 @@
       z-index: 10;
       display: none;
       pointer-events: auto;
-      touch-action: manipulation; /* ★ここ重要 */
+      touch-action: manipulation;
     }
 
     canvas {
@@ -83,7 +83,7 @@
   let scale = 1;
   let startDist = 0;
 
-  startBtn.onclick = async () => {
+  const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "environment" },
@@ -98,12 +98,23 @@
     }
   };
 
-  // ピンチ拡大縮小
+  startBtn.addEventListener("touchstart", e => {
+    e.preventDefault();
+    startCamera();
+  });
+
+  startBtn.addEventListener("click", startCamera);
+
   sign.addEventListener("touchstart", e => {
     if (e.touches.length === 2) {
-      startDist = getDist(e.touches[0], e.touches[1]);
+      startDist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
     }
   });
 
   sign.addEventListener("touchmove", e => {
-    if (e
+    if (e.touches.length === 2) {
+      const newDist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].cl
