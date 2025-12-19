@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TOKAI AR</title>
-
 <style>
 body {
   margin: 0;
@@ -13,7 +12,6 @@ body {
   font-family: sans-serif;
 }
 
-/* 背景 */
 video {
   position: fixed;
   top: 0;
@@ -25,12 +23,7 @@ video {
   pointer-events: none;
 }
 
-/* 起動ボタン */
-#startBtn {
-  position: fixed;
-  top: 45%;
-  left: 50%;
-  margin-left: -90px;   /* transformを使わない */
+button {
   width: 180px;
   padding: 14px 0;
   font-size: 16px;
@@ -38,29 +31,24 @@ video {
   border: none;
   background: #0066cc;
   color: white;
-  z-index: 9999;        /* ★最前面 */
   cursor: pointer;
+  z-index: 9999;
+  position: fixed;
 }
 
-/* 撮影ボタン */
+#startBtn {
+  top: 45%;
+  left: 50%;
+  margin-left: -90px;
+}
+
 #shutterBtn {
-  position: fixed;
   bottom: 20px;
   left: 50%;
   margin-left: -90px;
-  width: 180px;
-  padding: 14px 0;
-  font-size: 16px;
-  border-radius: 30px;
-  border: none;
-  background: #0066cc;
-  color: white;
-  z-index: 9999;
   display: none;
-  cursor: pointer;
 }
 
-/* 看板 */
 #sign {
   position: fixed;
   bottom: 20px;
@@ -75,7 +63,6 @@ video {
 canvas { display: none; }
 </style>
 </head>
-
 <body>
 
 <button id="startBtn">カメラを起動</button>
@@ -86,12 +73,31 @@ canvas { display: none; }
 <canvas id="canvas"></canvas>
 
 <script>
+const startBtn = document.getElementById("startBtn");
+const shutterBtn = document.getElementById("shutterBtn");
+const video = document.getElementById("video");
+const sign = document.getElementById("sign");
 const canvas = document.getElementById("canvas");
 
+// カメラ起動
+startBtn.addEventListener("click", async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    video.srcObject = stream;
+
+    // ボタン・看板の表示切り替え
+    startBtn.style.display = "none";
+    shutterBtn.style.display = "block";
+    sign.style.display = "block";
+  } catch (err) {
+    alert("カメラにアクセスできませんでした: " + err);
+  }
+});
+
+// 撮影処理
 shutterBtn.addEventListener("click", () => {
   const w = video.videoWidth;
   const h = video.videoHeight;
-
   canvas.width = w;
   canvas.height = h;
   const ctx = canvas.getContext("2d");
@@ -116,8 +122,5 @@ shutterBtn.addEventListener("click", () => {
   a.click();
 });
 </script>
-
-
 </body>
 </html>
-
