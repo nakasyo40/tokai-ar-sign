@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TOKAI AR - カメラ切替＆ユニーク保存対応</title>
+<title>TOKAI AR - 最新読み込み対応</title>
 <style>
 body {
   margin: 0;
@@ -29,7 +29,6 @@ video {
   left: 20px;
   width: 150px;
   z-index: 10;
-  pointer-events: auto;
   touch-action: none;
 }
 
@@ -46,25 +45,9 @@ button {
   z-index: 9999;
 }
 
-#startBtn {
-  top: 40%;
-  left: 50%;
-  margin-left: -90px;
-}
-
-#shutterBtn {
-  bottom: 20px;
-  left: 50%;
-  margin-left: -90px;
-  display: none;
-}
-
-#switchBtn {
-  bottom: 70px;
-  left: 50%;
-  margin-left: -90px;
-  display: none;
-}
+#startBtn { top: 40%; left: 50%; margin-left: -90px; }
+#shutterBtn { bottom: 20px; left: 50%; margin-left: -90px; display: none; }
+#switchBtn { bottom: 70px; left: 50%; margin-left: -90px; display: none; }
 
 canvas { display: none; }
 </style>
@@ -76,7 +59,7 @@ canvas { display: none; }
 <button id="switchBtn">カメラ切替</button>
 
 <video id="video" autoplay playsinline></video>
-<img id="sign" src="sign.png">
+<img id="sign">
 <canvas id="canvas"></canvas>
 
 <script>
@@ -88,7 +71,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const sign = document.getElementById("sign");
   const canvas = document.getElementById("canvas");
 
-  let currentFacing = "environment"; // デフォルト：アウトカメラ
+  // キャッシュバスター生成
+  const cacheVer = Date.now();
+
+  // 画像に自動でクエリ付与
+  sign.src = "sign.png?ver=" + cacheVer;
+
+  let currentFacing = "environment"; // デフォルトアウトカメラ
   let stream;
 
   async function startCamera(facingMode) {
@@ -138,7 +127,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const a = document.createElement("a");
     a.href = canvas.toDataURL("image/png");
 
-    // タイムスタンプ付きでユニークなファイル名
     const now = new Date();
     const timestamp = now.getFullYear().toString() +
                       (now.getMonth()+1).toString().padStart(2,'0') +
@@ -148,7 +136,6 @@ document.addEventListener("DOMContentLoaded", () => {
                       now.getSeconds().toString().padStart(2,'0') +
                       now.getMilliseconds().toString().padStart(3,'0');
     a.download = `tokai-ar-photo_${timestamp}.png`;
-
     a.click();
   });
 
@@ -175,6 +162,12 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
     }
   });
+
+  // URLがクエリなしなら自動でクエリ付与して再読み込み
+  if (!window.location.search.includes("ver=")) {
+    const newUrl = window.location.href.split('?')[0] + "?ver=" + cacheVer;
+    window.location.replace(newUrl);
+  }
 
 });
 </script>
