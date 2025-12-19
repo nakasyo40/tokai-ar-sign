@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TOKAI AR</title>
+<title>カメラテスト</title>
 <style>
 body {
   margin: 0;
   background: black;
-  overflow: hidden;
   font-family: sans-serif;
+  overflow: hidden;
 }
 
 video {
@@ -24,6 +24,7 @@ video {
 }
 
 button {
+  position: fixed;
   width: 180px;
   padding: 14px 0;
   font-size: 16px;
@@ -33,7 +34,6 @@ button {
   color: white;
   cursor: pointer;
   z-index: 9999;
-  position: fixed;
 }
 
 #startBtn {
@@ -49,17 +49,6 @@ button {
   display: none;
 }
 
-#sign {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-  width: 35vw;
-  max-width: 300px;
-  z-index: 10;
-  display: none;
-  pointer-events: auto;
-}
-
 canvas { display: none; }
 </style>
 </head>
@@ -69,7 +58,6 @@ canvas { display: none; }
 <button id="shutterBtn">撮影する</button>
 
 <video id="video" autoplay playsinline></video>
-<img id="sign" src="sign.png">
 <canvas id="canvas"></canvas>
 
 <script>
@@ -77,33 +65,9 @@ window.addEventListener("DOMContentLoaded", () => {
   const startBtn = document.getElementById("startBtn");
   const shutterBtn = document.getElementById("shutterBtn");
   const video = document.getElementById("video");
-  const sign = document.getElementById("sign");
   const canvas = document.getElementById("canvas");
 
   // カメラ起動
   startBtn.addEventListener("click", async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      video.srcObject = stream;
-
-      startBtn.style.display = "none";
-      shutterBtn.style.display = "block";
-      sign.style.display = "block";
-    } catch (err) {
-      alert("カメラにアクセスできませんでした: " + err);
-    }
-  });
-
-  // 撮影処理
-  shutterBtn.addEventListener("click", () => {
-    const w = video.videoWidth;
-    const h = video.videoHeight;
-    canvas.width = w;
-    canvas.height = h;
-    const ctx = canvas.getContext("2d");
-
-    // カメラ映像
-    ctx.drawImage(video, 0, 0, w, h);
-
-    // 看板を合成
-    const r = sign.getBoundingC
+      const stream = await navigator.mediaDevices.getUserMedia({
