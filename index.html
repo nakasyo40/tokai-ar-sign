@@ -1,120 +1,110 @@
 <!DOCTYPE html>
+<!-- v2025-AR-FINAL -->
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>TOKAI AR Sign</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <style>
-    body {
-      margin: 0;
-      background: black;
-      overflow: hidden;
-      font-family: sans-serif;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>TOKAI AR Sign</title>
 
-    #startBtn, #shutterBtn {
-      position: fixed;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 14px 22px;
-      font-size: 16px;
-      border-radius: 30px;
-      border: none;
-      background: #0066cc;
-      color: white;
-      z-index: 30;
-      pointer-events: auto;
-    }
+<style>
+body {
+  margin: 0;
+  background: black;
+  overflow: hidden;
+}
 
-    #startBtn {
-      top: 50%;
-      transform: translate(-50%, -50%);
-    }
+video {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  z-index: 1;
+}
 
-    #shutterBtn {
-      bottom: 20px;
-      display: none;
-    }
+#startBtn, #shutterBtn {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 14px 22px;
+  font-size: 16px;
+  border-radius: 30px;
+  border: none;
+  background: #0066cc;
+  color: white;
+  z-index: 20;
+}
 
-    video {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      object-fit: cover;
-      z-index: 1;
-      pointer-events: none;
-    }
+#startBtn {
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
 
-    #sign {
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      width: 35vw;
-      max-width: 320px;
-      z-index: 10;
-      display: none;
-      pointer-events: auto;
-      touch-action: manipulation;
-    }
+#shutterBtn {
+  bottom: 20px;
+  display: none;
+}
 
-    canvas {
-      display: none;
-    }
-  </style>
+#sign {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: 35vw;
+  max-width: 300px;
+  z-index: 10;
+  display: none;
+  touch-action: manipulation;
+}
+
+canvas { display: none; }
+</style>
 </head>
+
 <body>
 
-<button id="startBtn">カメラを起動</button>
-<button id="shutterBtn">撮影する</button>
+<button id="startBtn" onclick="startCamera()">カメラを起動</button>
+<button id="shutterBtn" onclick="takePhoto()">撮影する</button>
 
 <video id="video" autoplay playsinline></video>
-<img id="sign" src="sign.png" alt="AR看板">
+<img id="sign" src="sign.png">
 <canvas id="canvas"></canvas>
 
 <script>
-  const startBtn = document.getElementById("startBtn");
-  const shutterBtn = document.getElementById("shutterBtn");
-  const video = document.getElementById("video");
-  const sign = document.getElementById("sign");
-  const canvas = document.getElementById("canvas");
+let video = document.getElementById("video");
+let sign = document.getElementById("sign");
+let startBtn = document.getElementById("startBtn");
+let shutterBtn = document.getElementById("shutterBtn");
+let canvas = document.getElementById("canvas");
 
-  let scale = 1;
-  let startDist = 0;
+let scale = 1;
+let startDist = 0;
 
-  const startCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
-        audio: false
-      });
-      video.srcObject = stream;
-      startBtn.style.display = "none";
-      sign.style.display = "block";
-      shutterBtn.style.display = "block";
-    } catch (e) {
-      alert("カメラを起動できませんでした");
-    }
-  };
-
-  startBtn.addEventListener("touchstart", e => {
-    e.preventDefault();
-    startCamera();
+function startCamera() {
+  navigator.mediaDevices.getUserMedia({
+    video: { facingMode: "environment" },
+    audio: false
+  }).then(stream => {
+    video.srcObject = stream;
+    startBtn.style.display = "none";
+    sign.style.display = "block";
+    shutterBtn.style.display = "block";
+  }).catch(err => {
+    alert("カメラを起動できません");
   });
+}
 
-  startBtn.addEventListener("click", startCamera);
+sign.addEventListener("touchstart", e => {
+  if (e.touches.length === 2) {
+    startDist = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+  }
+});
 
-  sign.addEventListener("touchstart", e => {
-    if (e.touches.length === 2) {
-      startDist = Math.hypot(
-        e.touches[0].clientX - e.touches[1].clientX,
-        e.touches[0].clientY - e.touches[1].clientY
-      );
-    }
-  });
-
-  sign.addEventListener("touchmove", e => {
-    if (e.touches.length === 2) {
-      const newDist = Math.hypot(
-        e.touches[0].clientX - e.touches[1].cl
+sign.addEventListener("touchmove", e => {
+  if (e.touches.length === 2) {
+    let newDist = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.tou
