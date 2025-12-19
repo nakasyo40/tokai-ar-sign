@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Tokai University AR Sign</title>
+
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+
+    /* カメラ映像 */
+    video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: 1;
+    }
+
+    /* 看板画像（中央寄せ・写真映え） */
+    img {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      height: 70vh;        /* サイズ調整可：60〜80vh */
+      opacity: 0.9;        /* 少し透過して品よく */
+      z-index: 2;
+      pointer-events: none; /* 操作の邪魔をしない */
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- カメラ映像 -->
+  <video id="camera" autoplay playsinline></video
