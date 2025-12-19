@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>カメラテスト</title>
+<title>カメラ動作テスト</title>
 <style>
 body {
   margin: 0;
@@ -25,7 +25,7 @@ video {
 
 button {
   position: fixed;
-  width: 180px;
+  width: 200px;
   padding: 14px 0;
   font-size: 16px;
   border-radius: 30px;
@@ -39,13 +39,13 @@ button {
 #startBtn {
   top: 45%;
   left: 50%;
-  margin-left: -90px;
+  margin-left: -100px;
 }
 
 #shutterBtn {
   bottom: 20px;
   left: 50%;
-  margin-left: -90px;
+  margin-left: -100px;
   display: none;
 }
 
@@ -76,7 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
       startBtn.style.display = "none";
       shutterBtn.style.display = "block";
     } catch (err) {
-      alert("カメラにアクセスできませんでした: " + err);
+      alert("カメラにアクセスできませんでした。\n\n原因の多くは:\n- サイトのカメラ権限が許可されていない\n- HTTPS ではない\n- ブラウザ拡張が干渉\n\n詳細: " + err);
     }
   });
 
@@ -91,4 +91,11 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.drawImage(video, 0, 0, w, h);
 
     const a = document.createElement("a");
-    a.href = canvas.toData
+    a.href = canvas.toDataURL("image/png");
+    a.download = "camera-test.png";
+    a.click();
+  });
+});
+</script>
+</body>
+</html>
