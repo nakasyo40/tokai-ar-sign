@@ -3,27 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <title>TOKAI AR Sign</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <style>
     body {
       margin: 0;
       background: black;
       overflow: hidden;
       font-family: sans-serif;
+      touch-action: none;
     }
-    #startBtn {
+
+    #startBtn, #shutterBtn {
       position: fixed;
-      top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%);
-      padding: 16px 24px;
-      font-size: 18px;
-      border-radius: 8px;
+      transform: translateX(-50%);
+      padding: 14px 22px;
+      font-size: 16px;
+      border-radius: 30px;
       border: none;
       background: #0066cc;
       color: white;
-      z-index: 10;
+      z-index: 20;
     }
+
+    #startBtn {
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    #shutterBtn {
+      bottom: 20px;
+      display: none;
+    }
+
     video {
       position: fixed;
       top: 0;
@@ -32,49 +44,98 @@
       height: 100vh;
       object-fit: cover;
       z-index: 1;
-      pointer-events: none; /* ★ここ重要 */
+      pointer-events: none;
     }
+
     #sign {
       position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 80vw;
-      max-width: 600px;
-      z-index: 5;
+      bottom: 20px;
+      left: 20px;
+      width: 35vw;
+      max-width: 320px;
+      z-index: 10;
       display: none;
-      pointer-events: none;
+      touch-action: none;
+    }
+
+    canvas {
+      display: none;
     }
   </style>
 </head>
 <body>
 
 <button id="startBtn">カメラを起動</button>
+<button id="shutterBtn">撮影する</button>
 
 <video id="video" autoplay playsinline></video>
-
 <img id="sign" src="sign.png" alt="AR看板">
+<canvas id="canvas"></canvas>
 
 <script>
-  const btn = document.getElementById("startBtn");
+  const startBtn = document.getElementById("startBtn");
+  const shutterBtn = document.getElementById("shutterBtn");
   const video = document.getElementById("video");
   const sign = document.getElementById("sign");
+  const canvas = document.getElementById("canvas");
 
-  btn.onclick = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
-        audio: false
-      });
-      video.srcObject = stream;
-      video.style.pointerEvents = "auto"; // ★ここ追加
-      btn.style.display = "none";
-      sign.style.display = "block";
-    } catch (e) {
-      alert("カメラを起動できません。ブラウザ設定を確認してください。");
-    }
+  let scale = 1;
+  let startDist = 0;
+
+  startBtn.onclick = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" },
+      audio: false
+    });
+    video.srcObject = stream;
+    startBtn.style.display = "none";
+    sign.style.display = "block";
+    shutterBtn.style.display = "block";
   };
-</script>
 
-</body>
-</html>
+  // ピンチ拡大縮小
+  sign.addEventListener("touchstart", e => {
+    if (e.touches.length === 2) {
+      startDist = getDist(e.touches[0], e.touches[1]);
+    }
+  });
+
+  sign.addEventListener("touchmove", e => {
+    if (e.touches.length === 2) {
+      const newDist = getDist(e.touches[0], e.touches[1]);
+      scale *= newDist / startDist;
+      startDist = newDist;
+      sign.style.transform = `scale(${scale})`;
+    }
+  });
+
+  function getDist(t1, t2) {
+    return Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+  }
+
+  // 撮影処理
+  shutterBtn.onclick = () => {
+    const w = video.videoWidth;
+    const h = video.videoHeight;
+
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+
+    ctx.drawImage(video, 0, 0, w, h);
+
+    const rect = sign.getBoundingClientRect();
+    const scaleX = w / window.innerWidth;
+    const scaleY = h / window.innerHeight;
+
+    ctx.drawImage(
+      sign,
+      rect.left * scaleX,
+      rect.top * scaleY,
+      rect.width * scaleX * scale,
+      rect.height * scaleY * scale
+    );
+
+    const url = canvas.toDataURL("image/png");
+    const a = document.createElement("a");
+    a.href = url;
