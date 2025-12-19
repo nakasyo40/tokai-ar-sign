@@ -2,15 +2,104 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TEST</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>TOKAI AR</title>
+
+<style>
+body {
+  margin: 0;
+  background: black;
+  overflow: hidden;
+  font-family: sans-serif;
+}
+
+/* 背景カメラ */
+video {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  z-index: 1;
+  pointer-events: none; /* ★最重要 */
+}
+
+/* ボタン共通 */
+button {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 14px 22px;
+  font-size: 16px;
+  border-radius: 30px;
+  border: none;
+  background: #0066cc;
+  color: white;
+  z-index: 20;
+  pointer-events: auto; /* ★ */
+}
+
+/* 起動ボタン */
+#startBtn {
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* 撮影ボタン */
+#shutterBtn {
+  bottom: 20px;
+  display: none;
+}
+
+/* 看板 */
+#sign {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: 35vw;
+  max-width: 300px;
+  z-index: 10;
+  display: none;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+canvas { display: none; }
+</style>
 </head>
+
 <body>
 
-<button onclick="alert('押せています')"
-        style="font-size:30px; padding:30px;">
-  テストボタン
-</button>
+<button id="startBtn" onclick="startCamera()">カメラを起動</button>
+<button id="shutterBtn" onclick="takePhoto()">撮影する</button>
 
-</body>
-</html>
+<video id="video" autoplay playsinline></video>
+<img id="sign" src="sign.png">
+<canvas id="canvas"></canvas>
+
+<script>
+const video = document.getElementById("video");
+const sign = document.getElementById("sign");
+const startBtn = document.getElementById("startBtn");
+const shutterBtn = document.getElementById("shutterBtn");
+const canvas = document.getElementById("canvas");
+
+let scale = 1, startDist = 0;
+
+function startCamera() {
+  navigator.mediaDevices.getUserMedia({
+    video: { facingMode: "environment" },
+    audio: false
+  }).then(stream => {
+    video.srcObject = stream;
+    startBtn.style.display = "none";
+    sign.style.display = "block";
+    shutterBtn.style.display = "block";
+  }).catch(() => alert("カメラを起動できません"));
+}
+
+/* ピンチ拡大 */
+sign.addEventListener("touchstart", e => {
+  if (e.touches.length === 2) {
+    startDist = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clie
