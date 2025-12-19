@@ -10,7 +10,6 @@
       background: black;
       overflow: hidden;
       font-family: sans-serif;
-      touch-action: none;
     }
 
     #startBtn, #shutterBtn {
@@ -24,6 +23,7 @@
       background: #0066cc;
       color: white;
       z-index: 20;
+      pointer-events: auto;
     }
 
     #startBtn {
@@ -55,7 +55,8 @@
       max-width: 320px;
       z-index: 10;
       display: none;
-      touch-action: none;
+      pointer-events: auto;
+      touch-action: manipulation; /* ★ここ重要 */
     }
 
     canvas {
@@ -83,14 +84,18 @@
   let startDist = 0;
 
   startBtn.onclick = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: "environment" },
-      audio: false
-    });
-    video.srcObject = stream;
-    startBtn.style.display = "none";
-    sign.style.display = "block";
-    shutterBtn.style.display = "block";
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" },
+        audio: false
+      });
+      video.srcObject = stream;
+      startBtn.style.display = "none";
+      sign.style.display = "block";
+      shutterBtn.style.display = "block";
+    } catch (e) {
+      alert("カメラを起動できませんでした");
+    }
   };
 
   // ピンチ拡大縮小
@@ -101,41 +106,4 @@
   });
 
   sign.addEventListener("touchmove", e => {
-    if (e.touches.length === 2) {
-      const newDist = getDist(e.touches[0], e.touches[1]);
-      scale *= newDist / startDist;
-      startDist = newDist;
-      sign.style.transform = `scale(${scale})`;
-    }
-  });
-
-  function getDist(t1, t2) {
-    return Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
-  }
-
-  // 撮影処理
-  shutterBtn.onclick = () => {
-    const w = video.videoWidth;
-    const h = video.videoHeight;
-
-    canvas.width = w;
-    canvas.height = h;
-    const ctx = canvas.getContext("2d");
-
-    ctx.drawImage(video, 0, 0, w, h);
-
-    const rect = sign.getBoundingClientRect();
-    const scaleX = w / window.innerWidth;
-    const scaleY = h / window.innerHeight;
-
-    ctx.drawImage(
-      sign,
-      rect.left * scaleX,
-      rect.top * scaleY,
-      rect.width * scaleX * scale,
-      rect.height * scaleY * scale
-    );
-
-    const url = canvas.toDataURL("image/png");
-    const a = document.createElement("a");
-    a.href = url;
+    if (e
